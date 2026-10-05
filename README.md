@@ -1,7 +1,10 @@
 # macOS Caps Lock Delay: Mechanics Analysis & Decoupling Workaround
 > macOS Caps Lock 延遲痛點：底層機制解析與單雙擊解耦方案
 
-[![License: MIT](https://shields.io)](https://opensource.org) [![Platform: macOS](https://shields.io)](https://apple.com)
+**📜 License:** MIT | **💻 Platform:** macOS
+
+---
+
 
 
 ---
