@@ -168,7 +168,9 @@ macOS 原生將 Caps Lock 鍵強行綁定了「按壓時間長短」來判定三
 * **數值含意**：這個 `60` 代表「單擊的判定時間上限」（單位為毫秒）。
 * **調校建議**：每個人按鍵盤的習慣和手指力道不同。你可以依據自身硬體回彈速度與喜好，在 **50 到 100 之間**自由增減調整。調得越低，反應越神經反射、切換越快。
 
-<img width="600" alt="axis_delay_comparison" src="![Uploading axis_delay_comparison.png…]()" />
+<img width="600" alt="axis_delay_comparison" src="https://github.com/user-attachments/assets/afb6a92a-d4d9-4b42-b92e-a78e3726fc96" />
+
+
 
 | 鍵盤軸體類型 | 物理行程特性 | 建議判定閾值 | 調整邏輯說明（好懂版） |
 | --- | --- | --- | --- |
