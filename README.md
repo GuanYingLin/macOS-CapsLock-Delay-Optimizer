@@ -24,7 +24,7 @@ macOS 原生將 Caps Lock 鍵強行綁定了「按壓時間長短」來判定三
 ---
 
 ## 2. 解決方案演進與邊界探測 (Evolution & Trade-offs)
-> ⚠️ **重要說明**：本節僅作為不同方案的技術規格與極限比較。本專案**不贅述**過渡方案的具體實作。若對特定方案感興趣，請依表格中的「關鍵字」自行上網求解。
+> ⚠️ **重要說明**：本節僅作為不同方案的技術規格與極限比較。本專案**不贅述**過渡方案的具體實作。若對特定方案感興趣，請依表格中的「關鍵字」上網求解。
 
 ### 📊 方案規格與極限對比
 
@@ -34,78 +34,116 @@ macOS 原生將 Caps Lock 鍵強行綁定了「按壓時間長短」來判定三
 | **C (完全替換)** | 通用 | 停用 Caps Lock，改用 `Ctrl + Space` | 徹底消除延遲 | 必須強制重新建立肌肉記憶。 |
 | **B (功能降級)** | 通用 | Karabiner 將 Caps Lock 改為純輸入法鍵 | 徹底消除延遲 | 喪失大小寫鎖定功能，按鍵利用率降低。 |
 | **A (時間解耦)** | 通用 | Karabiner 拆分：雙擊切換、長按鎖定 | 顯著改善 | 仍受制於長按閾值，具等待遲滯感。 |
-| **⭐<br>進階 A(本案實作)** |**外接鍵盤** |**雙擊切換輸入法<br>> 單擊強制輸出 Caps Lock** |**最優解-零延遲** |**受限外接 F19 映射。中文模式下單擊僅能強制切換為小寫英文，大寫需配合 Shift。** |
+| **⭐<br>進階 A (本案實作)** | **外接鍵盤** | **雙擊切換輸入法<br>單擊強制輸出 Caps Lock** | **最優解-零延遲** | **受限外接 F19 映射。中文模式下單擊僅能強制切換為小寫英文，大寫需配合 Shift。** |
 | **S (硬體韌體)** | 外接鍵盤 | 客製化鍵盤寫入 `VIA / QMK` 巨集 | 理論上可行 | 具硬體門檻，筆電內建鍵盤無法適用。 |
-
----
-
 
 ---
 
 ## 3. 部署與設定指南 (Installation & Setup)
 
-### 步驟 1：前置作業（檢查權限）
-1. 請確保電腦已下載並安裝 [Karabiner-Elements](https://pqrs.org)。
-2. 打開 macOS 的 `系統設定` > `隱私權與安全性`。
-3. 確保在 **「輸入監聽 (Input Monitoring)」** 與 **「輔助使用 (Accessibility)」** 中，都已經勾選允許 Karabiner 開啟。
+本教學將引導你建立一個獨立的擴充規則檔案，**不需要**冒險修改主要設定檔，防呆且安全。
 
-### 步驟 2：打開設定檔
-1. 打開你的 Mac 終端機 (Terminal) 或你慣用的文字編輯器（如 VS Code / Cursor）。
-2. 開啟 Karabiner 的預設設定檔案，路徑在：`~/.config/karabiner/karabiner.json`
+### 步驟 1：硬體與系統前置準備（沒做絕對失敗！）
 
-### 步驟 3：貼入代碼（請注意 JSON 語法防呆）
-1. 在該檔案中，利用關鍵字搜尋（`Cmd + F`）找到 `"rules": [` 這個陣列。
-2. 將下方的 JSON 代碼**完整複製**，貼進 `"rules": [` 括號裡面的最前排。
-3. **⚠️ 語法防呆注意**：如果你的 `rules` 陣列原本就有其他規則，請記得在貼入的代碼最尾端的 `}` 後方**加上一個英文逗號 `,`**，否則格式出錯會導致 Karabiner 無法讀取。
+為了讓本方案生效，必須完全切斷 macOS 對 Caps Lock 鍵的原生控制權，請按照以下順序完成防呆設定：
+
+1. **關閉 Mac 原生輸入法切換勾勾：**
+   * 前往 macOS 的 `系統設定` > `鍵盤` > 點擊「`文字輸入`」旁的 **「編輯...」** 按鈕。
+   * **絕對要把「使用 大寫鎖定鍵來切換ABC及目前輸入方式」這個選項「取消勾選」（關閉）**！如果這個勾勾沒拿掉，原生系統會跟 Karabiner 搶訊號，導致功能完全錯亂。
+2. **到鍵盤驅動將實體按鍵改成 F19：**
+   * 打開你的外接鍵盤網頁端驅動程式（例如：Keychron Launcher / VIA 等）。
+   * 將你外接鍵盤上的實體 `Caps Lock` 按鍵，將其功能重新映射更改為 **`F19`**。
+   * *註：因為一般 Mac 鍵盤只有 F1-F12，將它改成不存在的 F19，Karabiner 才能乾淨地把它當作專用的「解耦觸發橋樑」。*
+3. **檢查軟體權限：**
+   * 請確保電腦已下載並安裝 [Karabiner-Elements](https://pqrs.org)。
+   * 前往 macOS 的 `系統設定` > `隱私權與安全性`。
+   * 確保在 **「輸入監聽 (Input Monitoring)」** 與 **「輔助使用 (Accessibility)」** 中，都已經手動勾選允許 Karabiner 開啟。
+4. **確認 Karabiner 有抓到外接鍵盤：**
+   * 打開 Karabiner 軟體，切換到 **「Devices」** 分頁。
+   * 找到你正在使用的那把外接鍵盤，確認其 **「Modify events」** 開關有**開啟（打勾）**。如果沒開啟，軟體將完全攔截不到訊號！
+
+---
+
+### 步驟 2：建立並儲存規則檔案
+
+1. 打開 Mac 內建的 **「文字編輯 (TextEdit)」** 軟體（或使用 VS Code / Cursor）。
+2. **⚠️ 格式轉換注意（最重要）**：如果是使用 Mac 內建的文字編輯，打開新檔案後，請務必先按下快捷鍵 `Cmd + Shift + T`。這會把檔案格式轉換為「純文字 (Plain Text)」模式，否則存檔會夾帶隱藏格式導致軟體無法讀取。
+3. 將下方黑底框框內的程式碼**完整複製**，並貼進檔案中：
 
 ```json
 {
-  "description": "F19 (Caps Lock): 雙擊切換輸入法, 單擊輸出大/小寫 (60ms 矮軸特化版)",
-  "manipulators": [
+  "title": "Caps Lock 2D 解耦模型 (訊號穩定版)",
+  "rules": [
     {
-      "type": "basic",
-      "conditions": [
+      "description": "F19: 雙擊切換, 長按大小寫",
+      "manipulators": [
         {
-          "type": "variable_if",
-          "name": "caps_double_tap",
-          "value": 1
+          "type": "basic",
+          "conditions": [
+            {
+              "type": "variable_if",
+              "name": "caps_double_tap",
+              "value": 1
+            }
+          ],
+          "from": {
+            "key_code": "f19",
+            "modifiers": { "optional": ["any"] }
+          },
+          "to": [
+            { "key_code": "spacebar", "modifiers": ["left_control"] },
+            { "set_variable": { "name": "caps_double_tap", "value": 0 } }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f19",
+            "modifiers": { "optional": ["any"] }
+          },
+          "to": [
+            { "set_variable": { "name": "caps_double_tap", "value": 1 } }
+          ],
+          "to_if_held_down": [
+            { 
+              "key_code": "caps_lock",
+              "hold_down_milliseconds": 500,
+              "repeat": false
+            }
+          ],
+          "to_delayed_action": {
+            "to_if_invoked": [
+              { "set_variable": { "name": "caps_double_tap", "value": 0 } }
+            ],
+            "to_if_canceled": [
+              { "set_variable": { "name": "caps_double_tap", "value": 0 } }
+          		]
+          },
+          "parameters": {
+            "basic.to_if_held_down_threshold_milliseconds": 60,
+            "basic.to_delayed_action_delay_milliseconds": 300
+          }
         }
-      ],
-      "from": {
-        "key_code": "f19",
-        "modifiers": { "optional": ["any"] }
-      },
-      "to": [
-        { "key_code": "spacebar", "modifiers": ["left_control"] },
-        { "set_variable": { "name": "caps_double_tap", "value": 0 } }
       ]
-    },
-    {
-      "type": "basic",
-      "from": {
-        "key_code": "f19",
-        "modifiers": { "optional": ["any"] }
-      },
-      "to": [
-        { "set_variable": { "name": "caps_double_tap", "value": 1 } }
-      ],
-      "to_delayed_action": {
-        "to_if_invoked": [
-          { "key_code": "caps_lock" },
-          { "set_variable": { "name": "caps_double_tap", "value": 0 } }
-        ],
-        "to_if_canceled": [
-          { "set_variable": { "name": "caps_double_tap", "value": 0 } }
-        ]
-      },
-      "parameters": {
-        "basic.to_delayed_action_delay_milliseconds": 60
-      }
     }
   ]
 }
 ```
-4. 儲存檔案（`Cmd + S`）。Karabiner 會在背景自動偵測並立刻生效，不需要重啟軟體。
+
+4. 儲存檔案（`Cmd + S`），並將檔案命名為 `caps_lock_decouple.json`（總之結尾一定要是 `.json`）。
+5. 請將這個存好的檔案，移動到以下路徑資料夾中：
+   `~/.config/karabiner/assets/complex_modifications`
+   * *提示：如果在 Finder 中找不到 `.config`，可在 Finder 畫面按下 `Cmd + Shift + .` 來顯示隱藏資料夾。*
+
+---
+
+### 步驟 3：在軟體介面上一鍵啟用
+
+1. 打開 Karabiner-Elements 主程式介面。
+2. 點選分頁中的 **「Complex Modifications」**。
+3. 點擊上方的 **「Add rule」** 按鈕。
+4. 這時你會看到畫面上出現我們剛剛新增的「**Caps Lock 2D 解耦模型 (訊號穩定版)**」。
+5. 點擊該規則右側的 **「Enable」** 按鈕。恭喜你，設定已當場全域生效！
 
 ---
 
@@ -119,15 +157,22 @@ macOS 原生將 Caps Lock 鍵強行綁定了「按壓時間長短」來判定三
 | **按一下 (單擊)** | 英文語法狀態 | 正常切換大小寫鎖定 (Caps Lock On/Off)。 |
 | **按一下 (單擊)** | 中文語法狀態 | 受限 macOS 底層權限機制，會強制輸出英文小寫。想輸入大寫需配合 `Shift` 鍵。 |
 
-### 硬體軸體特性與判定閾值分析 (Threshold Tuning)
+### 🧠 個人化參數手感調校 (Threshold Tuning)
 
-代碼中的 `"basic.to_delayed_action_delay_milliseconds": 60` 代表「系統判斷你是不是連按兩下」的等待時間。這個參數非常取決於你的**鍵盤物理回彈速度**，你可以依據下圖與表格進行微調：
+如果想要追求極致更貼合手感，你可以隨時用文字編輯器打開剛才的檔案，測試調校程式碼最後排的這行參數：
 
-<img width="600" alt="axis_delay_comparison" src="https://github.com/user-attachments/assets/7461eb9e-3d66-4858-9759-e792c6d229bb" />
+```json
+"basic.to_if_held_down_threshold_milliseconds": 60,
+```
+
+* **數值含意**：這個 `60` 代表「單擊的判定時間上限」（單位為毫秒）。
+* **調校建議**：每個人按鍵盤的習慣和手指力道不同。你可以依據自身硬體回彈速度與喜好，在 **50 到 100 之間**自由增減調整。調得越低，反應越神經反射、切換越快。
+
+<img width="600" alt="axis_delay_comparison" src="https://github.com" />
 
 | 鍵盤軸體類型 | 物理行程特性 | 建議判定閾值 | 調整邏輯說明（好懂版） |
 | --- | --- | --- | --- |
-| **矮軸 / 線性軸**<br>(如 Keychron K3 Max) | 鍵帽按下去的物理行程極短 (~2.5mm)，按起來完全沒有阻力，回彈速度極快。 | **50ms - 70ms** | 手指從按下去到完全放開可以在 50 毫秒內搞定。把數值壓低到 60ms 可以讓你的中英切換達到神經反射級的「絕對零延遲」。 |
+| **矮軸 / 線性軸**<br>(如 Keychron K3 Max) | 鍵帽按下去 the 物理行程極短 (~2.5mm)，按起來完全沒有阻力，回彈速度極快。 | **50ms - 70ms** | 手指從按下去到完全放開可以在 50 毫秒內搞定。把數值壓低到 60ms 可以讓你的中英切換達到神經反射級的「絕對零延遲」。 |
 | **標準高度機械軸**<br>(如青軸/茶軸/常規紅軸) | 鍵帽比較高，總行程長 (~4.0mm)，按下去比較深。 | **80ms - 100ms** | 因為鍵帽回彈需要走比較長的路徑。如果這個數值調得太低（例如設 60ms），系統會以為你只是按得比較慢的「單擊」，導致雙擊切換輸入法失效。 |
 
 ---
