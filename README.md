@@ -50,15 +50,18 @@ macOS 原生將 Caps Lock 鍵強行綁定了「按壓時間長短」來判定三
 1. **關閉 Mac 原生輸入法切換勾勾：**
    * 前往 macOS 的 `系統設定` > `鍵盤` > 點擊「`文字輸入`」旁的 **「編輯...」** 按鈕。
    * **絕對要把「使用 大寫鎖定鍵來切換ABC及目前輸入方式」這個選項「取消勾選」（關閉）**！如果這個勾勾沒拿掉，原生系統會跟 Karabiner 搶訊號，導致功能完全錯亂。
-2. **到鍵盤驅動將實體按鍵改成 F19：**
+2. **確認輸入法切換快速鍵：**
+   * 前往 macOS `系統設定` > `鍵盤` > `鍵盤快速鍵` > 點擊左側 `輸入方式`。
+   * 確保「選取上一個輸入來源」已勾選，且快速鍵為 **`^空格鍵 (Control + Space)`**。
+3. **到鍵盤驅動將實體按鍵改成 F19：**
    * 打開你的外接鍵盤網頁端驅動程式（例如：Keychron Launcher / VIA 等）。
    * 將你外接鍵盤上的實體 `Caps Lock` 按鍵，將其功能重新映射更改為 **`F19`**。
    * *註：因為一般 Mac 鍵盤只有 F1-F12，將它改成不存在的 F19，Karabiner 才能乾淨地把它當作專用的「解耦觸發橋樑」。*
-3. **檢查軟體權限：**
+4. **檢查軟體權限：**
    * 請確保電腦已下載並安裝 [Karabiner-Elements](https://pqrs.org)。
    * 前往 macOS 的 `系統設定` > `隱私權與安全性`。
    * 確保在 **「輸入監聽 (Input Monitoring)」** 與 **「輔助使用 (Accessibility)」** 中，都已經手動勾選允許 Karabiner 開啟。
-4. **確認 Karabiner 有抓到外接鍵盤：**
+5. **確認 Karabiner 有抓到外接鍵盤：**
    * 打開 Karabiner 軟體，切換到 **「Devices」** 分頁。
    * 找到你正在使用的那把外接鍵盤，確認其 **「Modify events」** 開關有**開啟（打勾）**。如果沒開啟，軟體將完全攔截不到訊號！
 
@@ -75,7 +78,7 @@ macOS 原生將 Caps Lock 鍵強行綁定了「按壓時間長短」來判定三
   "title": "Caps Lock 2D 解耦模型 (訊號穩定版)",
   "rules": [
     {
-      "description": "F19: 雙擊切換, 長按大小寫",
+      "description": "F19: 雙擊切換, 單擊大小寫",
       "manipulators": [
         {
           "type": "basic",
@@ -105,9 +108,9 @@ macOS 原生將 Caps Lock 鍵強行綁定了「按壓時間長短」來判定三
             { "set_variable": { "name": "caps_double_tap", "value": 1 } }
           ],
           "to_if_held_down": [
-            { 
+            {
               "key_code": "caps_lock",
-              "hold_down_milliseconds": 500,
+              "hold_down_milliseconds": 150,
               "repeat": false
             }
           ],
@@ -117,7 +120,7 @@ macOS 原生將 Caps Lock 鍵強行綁定了「按壓時間長短」來判定三
             ],
             "to_if_canceled": [
               { "set_variable": { "name": "caps_double_tap", "value": 0 } }
-          		]
+            ]
           },
           "parameters": {
             "basic.to_if_held_down_threshold_milliseconds": 60,
@@ -165,16 +168,14 @@ macOS 原生將 Caps Lock 鍵強行綁定了「按壓時間長短」來判定三
 "basic.to_if_held_down_threshold_milliseconds": 60,
 ```
 
-* **數值含意**：這個 `60` 代表「單擊的判定時間上限」（單位為毫秒）。
+* **數值含意**：這個 `60` 代表「單擊的防誤觸判定門檻」（單位為毫秒）。按壓超過 60ms 系統確認為刻意敲擊並送出訊號，低於 60ms 視為無意擦碰直接濾除。
 * **調校建議**：每個人按鍵盤的習慣和手指力道不同。你可以依據自身硬體回彈速度與喜好，在 **50 到 100 之間**自由增減調整。調得越低，反應越神經反射、切換越快。
 
-<img width="600" alt="axis_delay_comparison" src="https://github.com/user-attachments/assets/afb6a92a-d4d9-4b42-b92e-a78e3726fc96" />
-
-
+<img width="600" alt="axis_delay_comparison" src="https://github.com/user-attachments/assets/0e2c6359-c2c6-4b00-9270-ebe36d49a7dd" />
 
 | 鍵盤軸體類型 | 物理行程特性 | 建議判定閾值 | 調整邏輯說明（好懂版） |
-| --- | --- | --- | --- |
-| **矮軸 / 線性軸**<br>(如 Keychron K3 Max) | 鍵帽按下去 the 物理行程極短 (~2.5mm)，按起來完全沒有阻力，回彈速度極快。 | **50ms - 70ms** | 手指從按下去到完全放開可以在 50 毫秒內搞定。把數值壓低到 60ms 可以讓你的中英切換達到神經反射級的「絕對零延遲」。 |
+| :--- | :--- | :--- | :--- |
+| **矮軸 / 線性軸**<br>(如 Keychron K3 Max) | 鍵帽按下去物理行程極短 (~2.5mm)，按起來完全沒有阻力，回彈速度極快。 | **50ms - 70ms** | 手指從按下去到完全放開可以在 60 毫秒內搞定。把數值壓低到 60ms 可以過濾擦碰誤觸，同時讓中英切換達到神經反射級的「絕對零延遲」。 |
 | **標準高度機械軸**<br>(如青軸/茶軸/常規紅軸) | 鍵帽比較高，總行程長 (~4.0mm)，按下去比較深。 | **80ms - 100ms** | 因為鍵帽回彈需要走比較長的路徑。如果這個數值調得太低（例如設 60ms），系統會以為你只是按得比較慢的「單擊」，導致雙擊切換輸入法失效。 |
 
 ---
